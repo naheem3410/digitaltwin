@@ -3,3 +3,15 @@ uvicorn
 openai
 python-dotenv
 python-multipart
+boto3
+pypdf
+mangum
+langchain
+langchain-chroma
+langchain-huggingface
+chromadb
+sentence-transformers
+PyPDF2
+requests
+pydantic
+dotenv

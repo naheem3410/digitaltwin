@@ -258,3 +258,8 @@ next-env.d.ts
 
 .vercel
 
+/data
+/memory
+
+/backend/data
+/backend/memory
