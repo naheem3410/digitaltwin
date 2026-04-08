@@ -38,7 +38,7 @@ app.add_middleware(
 # Memory storage configuration
 USE_S3 = os.getenv("USE_S3", "false").lower() == "true"
 S3_BUCKET = os.getenv("S3_BUCKET", "")
-MEMORY_DIR = os.getenv("MEMORY_DIR", "../memory")
+MEMORY_DIR = os.getenv("MEMORY_DIR", "/tmp/memory")
 
 # Initialize S3 client if needed
 if USE_S3:
@@ -66,8 +66,8 @@ class Message(BaseModel):
 tool = ToolCreation()
 notification = Notification()
 
-cvs = tool.read_pdf("./data/knowledge")
-vector_store = tool.create_embeddings(cvs);
+# cvs = tool.read_pdf("./data/knowledge")
+# vector_store = tool.create_embeddings(cvs);
 
 name = "Naheem"
 full_name = "Naheem Quadri"

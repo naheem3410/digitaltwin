@@ -1,8 +1,13 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
+# check if the .env file exists
+env_path = os.path.join(os.path.dirname(__file__), "../.env")
+if not os.path.isfile(env_path):
+    env_path = None 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=env_path, env_file_encoding="utf-8", extra="ignore")
 
     openai_api_key: str = ""
     openrouter_api_key: str = ""

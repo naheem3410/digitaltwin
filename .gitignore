@@ -263,3 +263,5 @@ next-env.d.ts
 
 /backend/data
 /backend/memory
+lambda-deployment.zip
+lambda-package/

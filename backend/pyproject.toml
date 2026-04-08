@@ -10,6 +10,7 @@ dependencies = [
     "langchain>=1.2.15",
     "langchain-chroma>=1.1.0",
     "langchain-huggingface>=1.2.1",
+    "langchain-openai>=1.1.12",
     "mangum>=0.21.0",
     "openai>=2.30.0",
     "pydantic>=2.12.5",

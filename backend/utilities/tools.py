@@ -10,19 +10,21 @@ from pathlib import Path
 from chromadb import PersistentClient
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
 import requests
 from utilities.settings import Settings
 from utilities.models import Model
+from langchain_openai import OpenAIEmbeddings
+import shutil
+from chromadb.config import Settings as ChromaSettings
 
 
 # collection_name = "cvs"
 
 DB_NAME = "data/vector_db"
 
-
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Chroma(persist_directory=DB_NAME, embedding_function=embeddings)
+# embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+# # embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+# vectorstore = Chroma(persist_directory=DB_NAME, embedding_function=embeddings)
 
 RETRIEVAL_K = 2
 
@@ -52,7 +54,6 @@ class ToolCreation:
         self._tool_registry: dict[str, Callable] = {}
         self._logger = logging.getLogger(__name__)
         self.chunk_ratio:float = 0.2
-        self.retriever = vectorstore.as_retriever()
         self.settings = Settings()
         self.model = Model(type="openrouter")
         self.model_name = "meta-llama/Llama-3.1-70B-Instruct"
@@ -114,7 +115,11 @@ class ToolCreation:
                         continue
         return chunks
 
-    def create_embeddings(self,chunks):
+    
+    def create_embeddings(self, chunks):
+        
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+        
         docs = [Document(page_content=chunk) for chunk in chunks]
 
         if os.path.exists(DB_NAME):
@@ -126,13 +131,15 @@ class ToolCreation:
 
         collection = vectorstore._collection
         count = collection.count()
-        self.retriever = vectorstore.as_retriever()
+        
+        self.retriever = vectorstore.as_retriever() 
         print(f"There are {count:,} vectors in the vector store")
         
         return vectorstore
 
     def retrieve_context(self, query: str) -> list[str]:
-        docs = self.retriever.invoke(query, k=RETRIEVAL_K)
+        vectorstore = self.get_vectorstore()
+        docs = vectorstore.similarity_search(query, k=RETRIEVAL_K)
         return [doc.page_content for doc in docs]
 
    
@@ -205,3 +212,20 @@ class ToolCreation:
 
         result = self.model.get_model(self.model_name, eval_messages, tool_choice="none")
         return result.choices[0].message.content
+
+    def get_vectorstore(self):
+        source_db = "./data/vector_db" 
+        tmp_db = "/tmp/vector_db" 
+        
+        
+        if not os.path.exists(tmp_db):
+            print("Copying pre-built database to /tmp...")
+            shutil.copytree(source_db, tmp_db)
+        
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+        
+        return Chroma(
+            persist_directory=tmp_db, 
+            embedding_function=embeddings,
+            client_settings=ChromaSettings(anonymized_telemetry=False)
+        )
